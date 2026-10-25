@@ -1217,7 +1217,8 @@
             "shape": "flow",
             "attrs": {
               "line": {
-                "stroke": "#333333",
+                "stroke": "red",
+                "strokeWidth": 2.5,
                 "targetMarker": {
                   "name": "block"
                 },
@@ -1238,12 +1239,26 @@
               "outOfScope": false,
               "isTrustBoundary": false,
               "reasonOutOfScope": "",
-              "hasOpenThreats": false,
+              "hasOpenThreats": true,
               "isBidirectional": false,
               "isEncrypted": false,
               "isPublicNetwork": false,
               "protocol": "",
-              "threats": [],
+              "threats": [
+                {
+                  "id": "3bf4f5d8-ed8d-4fdb-942e-eac2c6aaf9f8",
+                  "title": "New STRIDE threat",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Tampering",
+                  "description": "Provide a description for this threat",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": true,
+                  "number": 5,
+                  "score": ""
+                }
+              ],
               "trustBoundaryIds": [
                 "0e192877-ba3e-4e33-be7d-0b98e95f61c4",
                 "5321cd2f-0597-444f-b2bd-fe55ff1de58f"
@@ -1263,8 +1278,16 @@
             },
             "vertices": [
               {
-                "x": 1150,
-                "y": 310
+                "x": 1090,
+                "y": 300
+              },
+              {
+                "x": 1180,
+                "y": 330
+              },
+              {
+                "x": 1240,
+                "y": 400
               }
             ]
           },
@@ -1579,6 +1602,6 @@
     ],
     "diagramTop": 2,
     "reviewer": "",
-    "threatTop": 4
+    "threatTop": 5
   }
 }
