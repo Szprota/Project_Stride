@@ -35,8 +35,8 @@
             },
             "visible": true,
             "shape": "trust-boundary-box",
-            "id": "0e192877-ba3e-4e33-be7d-0b98e95f61c4",
             "zIndex": -1,
+            "id": "0e192877-ba3e-4e33-be7d-0b98e95f61c4",
             "data": {
               "type": "tm.BoundaryBox",
               "name": "Wewmętrzna infratruktura Systemu",
@@ -80,6 +80,7 @@
             },
             "visible": true,
             "shape": "actor",
+            "zIndex": 1,
             "ports": {
               "groups": {
                 "top": {
@@ -163,7 +164,6 @@
               ]
             },
             "id": "d83e15f8-ecd0-473a-a164-6f00a9e995fb",
-            "zIndex": 1,
             "data": {
               "type": "tm.Actor",
               "name": "Klient (zalogowany)",
@@ -197,6 +197,7 @@
             },
             "visible": true,
             "shape": "process",
+            "zIndex": 2,
             "ports": {
               "groups": {
                 "top": {
@@ -280,7 +281,6 @@
               ]
             },
             "id": "cca04d4a-7c91-45aa-89f6-6f6e6817b0f5",
-            "zIndex": 2,
             "data": {
               "type": "tm.Process",
               "name": "Aplikacja internetowa (Frontend)",
@@ -299,7 +299,7 @@
           {
             "position": {
               "x": 836,
-              "y": 220
+              "y": 225
             },
             "size": {
               "width": 140,
@@ -310,13 +310,14 @@
                 "text": "Backend API"
               },
               "body": {
-                "stroke": "#333333",
-                "strokeWidth": 1.5,
+                "stroke": "red",
+                "strokeWidth": 2.5,
                 "strokeDasharray": null
               }
             },
             "visible": true,
             "shape": "process",
+            "zIndex": 3,
             "ports": {
               "groups": {
                 "top": {
@@ -400,7 +401,6 @@
               ]
             },
             "id": "b256268c-5ef2-403b-9739-6163508b36de",
-            "zIndex": 3,
             "data": {
               "type": "tm.Process",
               "name": "Backend API",
@@ -408,12 +408,60 @@
               "outOfScope": false,
               "isTrustBoundary": false,
               "reasonOutOfScope": "",
-              "hasOpenThreats": false,
+              "hasOpenThreats": true,
               "handlesCardPayment": false,
               "handlesGoodsOrServices": false,
               "isWebApplication": false,
               "privilegeLevel": "",
-              "threats": []
+              "threats": [
+                {
+                  "id": "6641af5c-8387-4f72-be7d-20662286175e",
+                  "title": "Podszywanie się pod operatora płatności",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Spoofing",
+                  "description": "Atakujący może podszyć się pod zewnętrznego operatora płatności i wysłać do Backend API fałszywe powiadomienie o pomyślnym opłaceniu zamówienia. Zagrożenie występuje podczas odbierania potwierdzeń płatności od zewnętrznego dostawcy usług płatniczych. Jeżeli system nie weryfikuje autentyczności komunikatu, może uznać nieopłacone zamówienie za opłacone i przekazać je do realizacji w restauracji. Skutkiem są straty finansowe oraz naruszenie integralności informacji o płatnościach.",
+                  "mitigation": "Weryfikować autentyczność powiadomień o płatnościach poprzez sprawdzanie podpisów kryptograficznych zgodnie z dokumentacją operatora. Dodatkowo kontrolować identyfikator transakcji, kwotę, walutę oraz status płatności. Stosować szyfrowane połączenia HTTPS/TLS i zabezpieczenie przed ponownym przetworzeniem tego samego powiadomienia. Zamówienie powinno zostać oznaczone jako opłacone dopiero po pozytywnej weryfikacji płatności.",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 10,
+                  "score": "3"
+                },
+                {
+                  "id": "310db389-4cbb-4d58-9dd9-4c5fd51b1784",
+                  "title": "Brak możliwości potwierdzenia złożenia zamówienia",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "type": "Repudiation",
+                  "description": "Klient może złożyć zamówienie za pośrednictwem aplikacji internetowej, a następnie zaprzeczyć wykonaniu tej operacji. Zagrożenie występuje, gdy Backend API nie zapisuje wystarczających informacji o działaniach użytkowników. W przypadku braku rejestrów zdarzeń administrator nie jest w stanie wiarygodnie odtworzyć przebiegu zamówienia i ustalić, z którego konta zostało ono złożone. Skutkiem mogą być trudności w rozpatrywaniu reklamacji, spory finansowe i utrudniona analiza incydentów bezpieczeństwa.",
+                  "mitigation": "Wprowadzić rejestrowanie najważniejszych operacji użytkowników, obejmujące identyfikator konta, numer zamówienia, datę, godzinę i rodzaj wykonanej czynności. Zapisywać historię zmian statusów zamówienia oraz identyfikatory powiązanych transakcji płatniczych. Chronić logi przed nieautoryzowaną modyfikacją i usunięciem oraz ograniczyć dostęp do nich wyłącznie do uprawnionego personelu.",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 12,
+                  "score": "2"
+                },
+                {
+                  "id": "4857bfe8-b73f-4105-8789-5e333eb632c5",
+                  "title": "Nieautoryzowane uzyskanie uprawnień administratora",
+                  "status": "Open",
+                  "severity": "Critical",
+                  "type": "Elevation of privilege",
+                  "description": "Atakujący posiadający zwykłe konto klienta może wykorzystać błąd w mechanizmie autoryzacji Backend API i uzyskać dostęp do funkcji administracyjnych. Zagrożenie występuje, gdy serwer nie weryfikuje uprawnień użytkownika przy wykonywaniu operacji wymagających wyższej roli. Atakujący może wtedy zmieniać statusy zamówień, uzyskiwać dostęp do danych innych klientów, modyfikować informacje w systemie lub wykonywać działania zastrzeżone dla administratora. Skutkiem jest poważne naruszenie poufności i integralności danych oraz możliwość zakłócenia działania całej platformy.",
+                  "mitigation": "Wdrożyć kontrolę dostępu opartą na rolach użytkowników (RBAC) oraz weryfikować uprawnienia przy każdym żądaniu do Backend API. Stosować zasadę najmniejszych uprawnień i domyślnie odmawiać dostępu do operacji wymagających wyższych uprawnień. Nie opierać autoryzacji wyłącznie na danych przesyłanych przez Frontend. Regularnie przeprowadzać testy bezpieczeństwa sprawdzające, czy zwykły użytkownik może wykonać operacje administratora.",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 15,
+                  "score": "4"
+                }
+              ],
+              "threatFrequency": {
+                "spoofing": 1,
+                "tampering": 0,
+                "repudiation": 1,
+                "informationDisclosure": 0,
+                "denialOfService": 0,
+                "elevationOfPrivilege": 1
+              }
             }
           },
           {
@@ -437,6 +485,7 @@
             },
             "visible": true,
             "shape": "actor",
+            "zIndex": 4,
             "ports": {
               "groups": {
                 "top": {
@@ -520,7 +569,6 @@
               ]
             },
             "id": "3ecd64cd-0328-4c24-86cf-17141262c678",
-            "zIndex": 4,
             "data": {
               "type": "tm.Actor",
               "name": "Dostawca",
@@ -554,6 +602,7 @@
             },
             "visible": true,
             "shape": "actor",
+            "zIndex": 5,
             "ports": {
               "groups": {
                 "top": {
@@ -637,7 +686,6 @@
               ]
             },
             "id": "5d24e49d-f697-4544-ad50-14cc9e1a2329",
-            "zIndex": 5,
             "data": {
               "type": "tm.Actor",
               "name": "Restauracje",
@@ -671,6 +719,7 @@
             },
             "visible": true,
             "shape": "actor",
+            "zIndex": 6,
             "ports": {
               "groups": {
                 "top": {
@@ -754,7 +803,6 @@
               ]
             },
             "id": "0b436e8f-bd59-4863-a0b4-ab1cd87ec5c0",
-            "zIndex": 6,
             "data": {
               "type": "tm.Actor",
               "name": "Operator Płatności",
@@ -781,16 +829,19 @@
                 "text": "Baza Danych"
               },
               "topLine": {
-                "strokeWidth": 1.5,
+                "stroke": "red",
+                "strokeWidth": 2.5,
                 "strokeDasharray": null
               },
               "bottomLine": {
-                "strokeWidth": 1.5,
+                "stroke": "red",
+                "strokeWidth": 2.5,
                 "strokeDasharray": null
               }
             },
             "visible": true,
             "shape": "store",
+            "zIndex": 7,
             "ports": {
               "groups": {
                 "top": {
@@ -874,7 +925,6 @@
               ]
             },
             "id": "385096ba-21a3-495e-b204-bdffd06e3f00",
-            "zIndex": 7,
             "data": {
               "type": "tm.Store",
               "name": "Baza Danych",
@@ -882,13 +932,33 @@
               "outOfScope": false,
               "isTrustBoundary": false,
               "reasonOutOfScope": "",
-              "hasOpenThreats": false,
+              "hasOpenThreats": true,
               "isALog": false,
               "isEncrypted": false,
               "isSigned": false,
               "storesCredentials": false,
               "storesInventory": false,
-              "threats": []
+              "threats": [
+                {
+                  "id": "ecb50d20-364a-4bcb-803d-1d68322f84d5",
+                  "title": "Nieautoryzowany dostęp do danych osobowych klientów",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Information disclosure",
+                  "description": "Atakujący może uzyskać nieautoryzowany dostęp do bazy danych zamówień poprzez wykorzystanie błędnej konfiguracji zabezpieczeń lub przejęcie danych uwierzytelniających konta posiadającego dostęp do bazy. W wyniku ataku możliwe jest odczytanie danych osobowych klientów, takich jak imiona, nazwiska, adresy dostawy, numery telefonów i historia zamówień. Skutkiem jest naruszenie poufności informacji, możliwość wykorzystania danych do oszustw i potencjalne konsekwencje prawne związane z naruszeniem ochrony danych osobowych.",
+                  "mitigation": "Ograniczyć dostęp do bazy danych wyłącznie do autoryzowanych usług i administratorów. Stosować zasadę najmniejszych uprawnień, silne uwierzytelnianie oraz bezpieczne przechowywanie danych dostępowych. Wdrożyć szyfrowanie połączeń z bazą i odpowiednie szyfrowanie danych przechowywanych. Regularnie aktualizować oprogramowanie bazodanowe, kontrolować konfigurację dostępu i monitorować próby nieautoryzowanego odczytu informacji.",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 13,
+                  "score": "3"
+                }
+              ],
+              "threatFrequency": {
+                "tampering": 0,
+                "repudiation": 0,
+                "informationDisclosure": 1,
+                "denialOfService": 0
+              }
             }
           },
           {
@@ -942,7 +1012,8 @@
             "shape": "flow",
             "attrs": {
               "line": {
-                "stroke": "#333333",
+                "stroke": "red",
+                "strokeWidth": 2.5,
                 "targetMarker": {
                   "name": "block"
                 },
@@ -963,16 +1034,48 @@
               "outOfScope": false,
               "isTrustBoundary": false,
               "reasonOutOfScope": "",
-              "hasOpenThreats": false,
+              "hasOpenThreats": true,
               "isBidirectional": false,
               "isEncrypted": false,
               "isPublicNetwork": false,
               "protocol": "",
-              "threats": [],
+              "threats": [
+                {
+                  "id": "cde97809-6ade-45ea-9a07-9e76daa84f42",
+                  "title": "Nieautoryzowana modyfikacja wartości zamówienia",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Tampering",
+                  "description": "Atakujący będący użytkownikiem aplikacji może zmodyfikować dane żądania wysyłanego z Frontendu do Backend API. Wykorzystując narzędzia deweloperskie przeglądarki lub oprogramowanie do modyfikowania żądań HTTP, może zmienić cenę produktu, koszt dostawy albo wartość rabatu. Jeśli Backend API nie weryfikuje przesłanych wartości, zamówienie może zostać zaakceptowane za zaniżoną kwotę. Skutkiem są straty finansowe restauracji oraz naruszenie integralności danych zamówienia.",
+                  "mitigation": "Obliczać ostateczną wartość zamówienia wyłącznie po stronie Backend API, wykorzystując aktualne ceny produktów zapisane w systemie. Nie ufać wartościom cen przesyłanym przez aplikację klienta. Weryfikować poprawność kodów rabatowych, ilości produktów i kosztów dostawy. Stosować walidację danych wejściowych oraz testy bezpieczeństwa sprawdzające możliwość modyfikowania parametrów zamówienia.",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 11,
+                  "score": "3"
+                },
+                {
+                  "id": "2ef08abd-c1cf-44a9-90b4-0a951e961d82",
+                  "title": "Przeciążenie API nadmierną liczbą żądań",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Denial of service",
+                  "description": "Atakujący może wykorzystać publicznie dostępne żądania API związane ze składaniem zamówień, generując dużą liczbę zapytań w krótkim czasie. Nadmierny ruch na połączeniu Frontend – Backend API powoduje zwiększone obciążenie serwera i wyczerpywanie dostępnych zasobów. W konsekwencji system może odpowiadać z dużym opóźnieniem lub całkowicie przestać obsługiwać prawidłowe żądania. Skutkiem jest brak możliwości składania zamówień przez klientów, utrata dostępności usługi i straty finansowe.",
+                  "mitigation": "Zastosować ograniczanie liczby żądań (rate limiting) na poziomie API, uwzględniając adres IP oraz identyfikator użytkownika. Wprowadzić limity równoczesnych operacji i mechanizmy ochrony przed automatycznym generowaniem żądań. Stosować systemy ochrony anty-DDoS oraz monitorowanie obciążenia infrastruktury. Konfigurować alarmy wykrywające nietypowy wzrost liczby zapytań i automatyczne mechanizmy ograniczające podejrzany ruch.",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 14,
+                  "score": "3"
+                }
+              ],
               "trustBoundaryIds": [
                 "0e192877-ba3e-4e33-be7d-0b98e95f61c4",
                 "5321cd2f-0597-444f-b2bd-fe55ff1de58f"
-              ]
+              ],
+              "threatFrequency": {
+                "tampering": 1,
+                "informationDisclosure": 0,
+                "denialOfService": 1
+              }
             },
             "labels": [
               "Złożenie zamówienia"
@@ -987,6 +1090,10 @@
               "port": "6619248e-f46e-4a0b-a14d-84448f870990"
             },
             "vertices": [
+              {
+                "x": 750,
+                "y": 260
+              },
               {
                 "x": 770,
                 "y": 260
@@ -1217,8 +1324,7 @@
             "shape": "flow",
             "attrs": {
               "line": {
-                "stroke": "red",
-                "strokeWidth": 2.5,
+                "stroke": "#333333",
                 "targetMarker": {
                   "name": "block"
                 },
@@ -1239,26 +1345,12 @@
               "outOfScope": false,
               "isTrustBoundary": false,
               "reasonOutOfScope": "",
-              "hasOpenThreats": true,
+              "hasOpenThreats": false,
               "isBidirectional": false,
               "isEncrypted": false,
               "isPublicNetwork": false,
               "protocol": "",
-              "threats": [
-                {
-                  "id": "3bf4f5d8-ed8d-4fdb-942e-eac2c6aaf9f8",
-                  "title": "New STRIDE threat",
-                  "status": "Open",
-                  "severity": "TBD",
-                  "type": "Tampering",
-                  "description": "Provide a description for this threat",
-                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
-                  "modelType": "STRIDE",
-                  "new": true,
-                  "number": 5,
-                  "score": ""
-                }
-              ],
+              "threats": [],
               "trustBoundaryIds": [
                 "0e192877-ba3e-4e33-be7d-0b98e95f61c4",
                 "5321cd2f-0597-444f-b2bd-fe55ff1de58f"
@@ -1602,6 +1694,6 @@
     ],
     "diagramTop": 2,
     "reviewer": "",
-    "threatTop": 5
+    "threatTop": 15
   }
 }
